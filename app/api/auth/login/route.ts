@@ -3,19 +3,14 @@ import prisma from "@/lib/client";
 import bcrypt from "bcrypt";
 import { loginSchema } from "@/lib/validation";
 
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
     const result = loginSchema.safeParse(body);
 
-    if (!result.success) {
-      return NextResponse.json(
-        { errors: result.error.format() },
-        { status: 400 }
-      );
-    }
+    if (!result.success)
+      return NextResponse.json(result.error.format(), { status: 400 });
 
     const { email, password } = result.data;
 
