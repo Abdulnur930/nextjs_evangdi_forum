@@ -9,6 +9,21 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email").nonempty("Email is required"),
+  email: z.string().email("Invalid email"),
   password: z.string().nonempty("Password is required"),
 });
+export const questionSchema = z.object({
+  title: z
+    .string()
+    .min(1, { message: "Title is required" })
+    .max(255, { message: "Title is too long" }),
+  description: z.string().min(1, { message: "Description is required" }),
+  tag: z
+    .string()
+    .max(50, { message: "Tag is too long" })
+    .optional()
+    .nullable()
+    .transform((e) => (e === "" ? null : e)), // Handle empty string to null for optional
+});
+
+export type QuestionFormData = z.infer<typeof questionSchema>;
