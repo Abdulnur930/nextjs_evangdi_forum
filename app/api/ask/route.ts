@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/client"; // Your Prisma client
-import { questionSchema } from "@/lib/validation"; // Your Zod schema
-import { z } from "zod"; // Zod library
-import jwt from "jsonwebtoken"; // For JWT verification
+import prisma from "@/lib/client";
+import { questionSchema } from "@/lib/validation";
+import { z } from "zod";
+import jwt from "jsonwebtoken";
 
-// Define your JWT secret (ensure it's in your .env.local file)
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Type for the decoded JWT payload
 interface JwtPayload {
-  userId: string; // The user ID stored in your JWT
-  // Add other properties if your JWT contains them
+  userid: string;
 }
 
 export async function POST(req: Request) {
@@ -25,9 +22,8 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // 1. Server-side validation using Zod
+    // Validate the incoming request data
     const validationResult = questionSchema.safeParse(body);
-
     if (!validationResult.success) {
       return NextResponse.json(
         {
@@ -40,16 +36,23 @@ export async function POST(req: Request) {
 
     const { title, description, tag } = validationResult.data;
 
-    // 2. Authenticate and Authorize User via Bearer Token
-    const authorizationHeader = req.headers.get("Authorization");
-    if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
+    // Retrieve the cookie from the request headers
+    const cookie = req.headers.get("cookie");
+    const cookies =
+      cookie?.split(";").reduce((acc, current) => {
+        const [name, value] = current.trim().split("=");
+        acc[name] = value;
+        return acc;
+      }, {} as Record<string, string>) || {};
+
+    const token = cookies["sessionToken"]; // Adjust to match your cookie name
+
+    if (!token) {
       return NextResponse.json(
         { message: "Unauthorized: No token provided" },
         { status: 401 }
       );
     }
-
-    const token = authorizationHeader.split(" ")[1]; // Extract the token part
 
     let decoded: JwtPayload;
     try {
@@ -62,17 +65,16 @@ export async function POST(req: Request) {
       );
     }
 
-    // Ensure the decoded token has a userId
-    if (!decoded.userId) {
+    const authenticatedUserId = parseInt(decoded.userid, 10);
+
+    if (isNaN(authenticatedUserId)) {
       return NextResponse.json(
-        { message: "Unauthorized: Invalid token payload" },
+        { message: "Unauthorized: Invalid user ID in token payload" },
         { status: 401 }
       );
     }
 
-    const authenticatedUserId = decoded.userId;
-
-    // Optional: Verify if the user ID from the token actually exists in your database
+    // Check if the user exists in the database
     const userExists = await prisma.user.findUnique({
       where: { userid: authenticatedUserId },
     });
@@ -84,20 +86,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Save the question to the database
+    // Create the new question in the database
     const newQuestion = await prisma.question.create({
       data: {
         title,
         description,
-        tag: tag || null, // Ensure tag is null if empty string (Zod transform already handles this, but good for clarity)
-        userid: authenticatedUserId, // Use the authenticated user's ID
+        tag: tag || null,
+        userid: authenticatedUserId,
       },
     });
 
-    // 4. Return success response
     return NextResponse.json(
       { message: "Question posted successfully", question: newQuestion },
-      { status: 201 } // 201 Created is appropriate for new resource creation
+      { status: 201 }
     );
   } catch (error) {
     console.error("Error posting question:", error);

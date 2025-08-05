@@ -1,114 +1,127 @@
-<<<<<<< HEAD
+"use client";
 
-export default function Home() {
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import axios from "axios";
+import { ChevronRight } from "lucide-react";
+import Spinner from "@/app/components/Spinner"; // Assuming you have a Spinner component
+import Image from "next/image"; // Next.js Image component for optimization
+
+// NOTE: Since your previous code used a global AppState context, we will
+// assume that a similar context exists to provide the user information.
+// For this example, we'll use a placeholder state.
+// In a real application, you would use a context provider to wrap your app.
+// import { useAuth } from "@/app/context/AuthContext";
+
+const Home = () => {
+  const router = useRouter();
+  const [allQuestions, setAllQuestions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<{ username: string | null }>({
+    username: "Guest",
+  }); // Placeholder for user data
+
+  useEffect(() => {
+    // Set axios to automatically include credentials (cookies) in requests
+    axios.defaults.withCredentials = true;
+
+    // Fetch all questions when the component mounts
+    fetchAllQuestions();
+  }, []);
+
+  const fetchAllQuestions = async () => {
+    setIsLoading(true);
+    try {
+      // The authentication cookie is automatically sent by the browser
+      // due to `withCredentials: true`. The API route on the server
+      // will verify this cookie.
+      const { data } = await axios.get("/api/questions");
+      setAllQuestions(data);
+
+      // We also fetch the user from a session endpoint to display their name.
+      const userRes = await axios.get("/api/auth/check-session");
+      if (userRes.data.loggedIn) {
+        setUser({ username: userRes.data.username }); // Assuming the API returns username
+      } else {
+        setUser({ username: "Guest" });
+      }
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Something went wrong:", error);
+      setIsLoading(false);
+    }
+  };
+
+  const handleAskQuestion = () => {
+    router.push("/ask");
+  };
+
   return (
     <>
-      <div>
-        hello
-      </div>
-    </>
-=======
-import Image from "next/image";
-
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {isLoading ? (
+        // Simple loading spinner to replace the custom Loader component
+        <div className="flex justify-center items-center min-h-[65vh]">
+          <Spinner />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
->>>>>>> af3339c4bb1d14f0de98f40a4d0c42bd753d7a27
+      ) : (
+        <div className="container mx-auto my-5 p-4 md:p-0 min-h-[65vh] text-blue-950">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-5">
+            <button
+              onClick={handleAskQuestion}
+              className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-md text-lg hover:bg-orange-500 active:ring-4 active:ring-blue-600 transition-colors duration-300 w-full md:w-auto"
+            >
+              Ask Question
+            </button>
+            <h5 className="mt-4 md:mt-0 text-lg font-semibold">
+              Welcome:
+              <span className="font-bold"> {user?.username}</span>
+            </h5>
+          </div>
+
+          <h3 className="mt-6 mb-4 text-2xl font-bold border-b-2 border-gray-200 pb-2">
+            Questions
+          </h3>
+
+          <div>
+            {allQuestions.length > 0 ? (
+              allQuestions.map((item) => (
+                <div key={item.questionid}>
+                  <Link href={`/answer/${item.questionid}`} passHref>
+                    <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-white hover:bg-gray-100 transition-colors duration-300 border-b border-gray-200 last:border-b-0 cursor-pointer">
+                      <div className="flex flex-col md:flex-col items-center w-full md:w-2/12">
+                        <Image
+                          src="/evangadi-logo.png" // Use a placeholder or your profile image path
+                          alt="avatar"
+                          width={80}
+                          height={80}
+                          className="h-20 w-20 rounded-full object-cover p-1 bg-gray-300 group-hover:bg-blue-950 transition-colors duration-300"
+                        />
+                        <h6 className="mt-2 md:mt-0 md:ml-3 text-lg font-semibold">
+                          {item?.username || "Anonymous"}
+                        </h6>
+                      </div>
+                      <div className="w-full md:w-9/12 my-2 md:my-0 text-center md:text-left">
+                        <h6 className="text-xl font-bold">{item.title}</h6>
+                      </div>
+                      <div className="w-full md:w-1/12 flex justify-center mt-2 md:mt-0">
+                        <ChevronRight className="h-8 w-8 text-gray-500 hover:ml-4 transition-all duration-300" />
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-lg text-gray-500 mt-10">
+                No questions found.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
-}
+};
+
+export default Home;

@@ -18,12 +18,8 @@ export const questionSchema = z.object({
     .min(1, { message: "Title is required" })
     .max(255, { message: "Title is too long" }),
   description: z.string().min(1, { message: "Description is required" }),
-  tag: z
-    .string()
-    .max(50, { message: "Tag is too long" })
-    .optional()
-    .nullable()
-    .transform((e) => (e === "" ? null : e)), // Handle empty string to null for optional
+  // SIMPLIFIED: Define as string, nullable, and optional.
+  // The transformation of "" to null will happen in onSubmit.
+  tag: z.string().max(50, { message: "Tag is too long" }).nullable().optional(),
 });
 
-export type QuestionFormData = z.infer<typeof questionSchema>;

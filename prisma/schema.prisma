@@ -14,35 +14,32 @@ datasource db {
 }
 
 model User {
-  userid    Int    @id @default(autoincrement())
-  username  String @unique @db.VarChar(50)
-  firstname String @db.VarChar(100)
-  lastname  String @db.VarChar(100)
-  email     String @unique @db.VarChar(255)
-  password  String @db.VarChar(255)
-
+  userid    Int        @id @default(autoincrement())
+  username  String     @unique @db.VarChar(50)
+  firstname String     @db.VarChar(100)
+  lastname  String     @db.VarChar(100)
+  email     String     @unique @db.VarChar(255)
+  password  String     @db.VarChar(255)
   questions Question[]
   answers   Answer[]
 }
 
 model Question {
-  id          Int     @id @default(autoincrement())
-  questionid  String  @unique @db.VarChar(36)
+  id          Int      @id @default(autoincrement())
+  questionid  String   @unique @default(uuid()) @db.VarChar(36)
   userid      Int
-  title       String  @db.VarChar(255)
-  description String  @db.Text
-  tag         String? @db.VarChar(50)
-
-  user    User     @relation(fields: [userid], references: [userid])
-  answers Answer[]
+  title       String   @db.VarChar(255)
+  description String   @db.Text
+  tag         String?  @db.VarChar(50)
+  user        User     @relation(fields: [userid], references: [userid])
+  answers     Answer[]
 }
 
 model Answer {
-  answerid   Int    @id @default(autoincrement())
+  answerid   Int      @id @default(autoincrement())
   userid     Int
-  questionid String @db.VarChar(100)
-  answer     String @db.Text
-
-  user     User     @relation(fields: [userid], references: [userid])
-  question Question @relation(fields: [questionid], references: [questionid])
+  questionid String   @db.VarChar(100)
+  answer     String   @db.Text
+  user       User     @relation(fields: [userid], references: [userid])
+  question   Question @relation(fields: [questionid], references: [questionid])
 }

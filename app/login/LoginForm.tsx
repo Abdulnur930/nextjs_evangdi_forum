@@ -5,16 +5,17 @@ import { EyeOff, Eye } from "lucide-react";
 import { useForm } from "react-hook-form";
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
-import { loginSchema } from "@/lib/validation"; 
+import { loginSchema } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import { z } from "zod";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const LoginForm: React.FC = () => {
-  const router = useRouter();
+  // We remove the 'useRouter' hook because we will use a full page reload.
+  // const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -27,23 +28,25 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
 
-  // Consolidated onSubmit handler for form submission
   const onSubmit = handleSubmit(async (data) => {
-    setError(""); // Clear previous general errors
-    setSubmitting(true); // Indicate submission is in progress
+    setError("");
+    setSubmitting(true);
 
     try {
       await axios.post("/api/auth/login", data);
-      router.push("/"); // Redirect to home on successful login
+
+      // --- FIX: Replace router.push with a full page reload ---
+      // This ensures the cookie is properly set and all components re-render correctly.
+      // This solves the issue of the "Ask a question" page failing on the first attempt after login.
+      window.location.href = "/";
     } catch (err) {
-      // Handle different types of errors if needed, e.g., network errors, server response errors
       if (axios.isAxiosError(err) && err.response?.data?.message) {
-        setError(err.response.data.message); // Use message from server if available
+        setError(err.response.data.message);
       } else {
-        setError("An unexpected error occurred. Please try again."); // General fallback
+        setError("An unexpected error occurred. Please try again.");
       }
     } finally {
-      setSubmitting(false); // End submission state regardless of success or failure
+      setSubmitting(false);
     }
   });
 
@@ -53,7 +56,6 @@ const LoginForm: React.FC = () => {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col">
-      {/* Display general submission error message */}
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
       <input
@@ -62,7 +64,6 @@ const LoginForm: React.FC = () => {
         placeholder="Enter your email"
         {...register("email")}
       />
-      {/* Display validation error for email */}
       <ErrorMessage>{errors.email?.message}</ErrorMessage>
 
       <div className="relative mt-2">
@@ -72,7 +73,6 @@ const LoginForm: React.FC = () => {
           placeholder="Enter your password"
           {...register("password")}
         />
-        {/* Display validation error for password */}
         <ErrorMessage>{errors.password?.message}</ErrorMessage>
 
         <span
@@ -88,11 +88,11 @@ const LoginForm: React.FC = () => {
       </div>
 
       <button
-        type="submit" // Changed to type="submit" for form submission
-        disabled={isSubmitting} // Disable button while submitting
+        type="submit"
+        disabled={isSubmitting}
         className="logSign bg-[#516cf0] w-full h-14 text-white rounded-md text-xl text-center mt-6 hover:bg-[#ff8500] active:border-3 active:border-[#516cf0] transition-colors duration-300 flex items-center justify-center gap-2"
       >
-        {isSubmitting && <Spinner />} {/* Show spinner if submitting */}
+        {isSubmitting && <Spinner />}
         Login
       </button>
     </form>
