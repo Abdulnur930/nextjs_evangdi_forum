@@ -5,25 +5,18 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { ChevronRight } from "lucide-react";
-import Spinner from "@/app/components/Spinner"; // Assuming you have a Spinner component
-import Image from "next/image"; // Next.js Image component for optimization
-
-// NOTE: Since your previous code used a global AppState context, we will
-// assume that a similar context exists to provide the user information.
-// For this example, we'll use a placeholder state.
-// In a real application, you would use a context provider to wrap your app.
-// import { useAuth } from "@/app/context/AuthContext";
+import Image from "next/image"; 
+import Homepageloading from "./loading";
 
 const Home = () => {
   const router = useRouter();
   const [allQuestions, setAllQuestions] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<{ username: string | null }>({
     username: "Guest",
   }); // Placeholder for user data
 
   useEffect(() => {
-    // Set axios to automatically include credentials (cookies) in requests
     axios.defaults.withCredentials = true;
 
     // Fetch all questions when the component mounts
@@ -33,10 +26,8 @@ const Home = () => {
   const fetchAllQuestions = async () => {
     setIsLoading(true);
     try {
-      // The authentication cookie is automatically sent by the browser
-      // due to `withCredentials: true`. The API route on the server
-      // will verify this cookie.
       const { data } = await axios.get("/api/questions");
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       setAllQuestions(data);
 
       // We also fetch the user from a session endpoint to display their name.
@@ -61,10 +52,7 @@ const Home = () => {
   return (
     <>
       {isLoading ? (
-        // Simple loading spinner to replace the custom Loader component
-        <div className="flex justify-center items-center min-h-[65vh]">
-          <Spinner />
-        </div>
+        <Homepageloading />
       ) : (
         <div className="container mx-auto my-5 p-4 md:p-0 min-h-[65vh] text-blue-950">
           <div className="flex flex-col md:flex-row justify-between items-center mb-5">
@@ -92,7 +80,7 @@ const Home = () => {
                     <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-white hover:bg-gray-100 transition-colors duration-300 border-b border-gray-200 last:border-b-0 cursor-pointer">
                       <div className="flex flex-col md:flex-col items-center w-full md:w-2/12">
                         <Image
-                          src="/evangadi-logo.png" // Use a placeholder or your profile image path
+                          src="/User.png"
                           alt="avatar"
                           width={80}
                           height={80}
