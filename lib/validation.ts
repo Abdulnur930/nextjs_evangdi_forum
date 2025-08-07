@@ -18,8 +18,10 @@ export const questionSchema = z.object({
     .min(1, { message: "Title is required" })
     .max(255, { message: "Title is too long" }),
   description: z.string().min(1, { message: "Description is required" }),
-  // SIMPLIFIED: Define as string, nullable, and optional.
-  // The transformation of "" to null will happen in onSubmit.
   tag: z.string().max(50, { message: "Tag is too long" }).nullable().optional(),
 });
 
+export const answerSchema = z.object({
+  questionid: z.string().nonempty("Question ID is required."),
+  answer: z.string().min(1, { message: "Answer is required" }),
+});

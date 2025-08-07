@@ -27,8 +27,6 @@ const Home = () => {
     setIsLoading(true);
     try {
       const { data } = await axios.get("/api/questions");
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      setAllQuestions(data);
 
       // We also fetch the user from a session endpoint to display their name.
       const userRes = await axios.get("/api/auth/check-session");

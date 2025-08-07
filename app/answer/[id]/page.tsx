@@ -1,9 +1,12 @@
 import React from 'react'
+import SingleQue from './SingleQue'
+import PostAnswer from './PostAnswer'
 
-const EachQuestionPage = () => {
+const SingleQuestionPage = () => {
   return (
-    <div>EachQuestionPage</div>
+    <><SingleQue />
+    <PostAnswer/></>
   )
 }
 
-export default EachQuestionPage
+export default SingleQuestionPage
